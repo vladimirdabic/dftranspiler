@@ -1,0 +1,25 @@
+const pvp_kit = item
+{
+    id: "minecraft:iron_sword",
+    Count: 1b,
+    tag: {
+        HideFlags: 127,
+        display: {
+            Name: '[{"italic":false,"color":"aqua","text":"PvP Kit"}]',
+            Lore: ['[{"italic":false,"color":"gray","text":"The starter kit."}]']
+        }
+    }
+};
+
+const archer_kit = item
+{
+    id: "minecraft:bow",
+    Count: 1b,
+    tag: {
+        display: {
+            Name: '[{"italic":false,"color":"gold","text":"Archer Kit"}]',
+            Lore: ['[{"italic":false,"color":"gray","text":"Shoot people wow"}]']
+        }
+    }
+};
+

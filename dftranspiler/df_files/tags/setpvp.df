@@ -1,0 +1,2 @@
+#define PVP_ENABLE "PVP": "Enable"
+#define PVP_DISABLE "PVP": "Disable"

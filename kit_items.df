@@ -1,0 +1,6 @@
+#define PVP_KIT_ITEMS item{id:"minecraft:iron_sword",Count:1b}
+#define PVP_KIT_ARMOR item{id:"minecraft:iron_chestplate",Count:1b}(1), item{id:"minecraft:iron_boots",Count:1b}(3)
+
+#define ARCHER_KIT_ITEMS item{id:"minecraft:wooden_sword",Count:1b}, item{id:"minecraft:bow",Count:1b}, item{id:"minecraft:arrow",Count:32b}
+#define ARCHER_KIT_ARMOR item{id:"minecraft:diamond_chestplate",Count:1b}(1), item{id:"minecraft:diamond_boots",Count:1b}(3)
+

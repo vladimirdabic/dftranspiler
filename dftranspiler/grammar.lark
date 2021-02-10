@@ -1,0 +1,156 @@
+// basic stuff
+statements: statement (statement)*
+
+?statement: event_def
+          | scoped_def
+          | hidden_def
+          | func_def
+          | proc_def
+          | if_statement
+          | else_stmt
+          | while_statement
+          | forever_loop
+          | "end" ";" -> end
+          | "return" ";" -> return_stmt
+          | "continue" ";" -> continue_stmt
+          | "break" ";" -> break_stmt
+          | func_call ";"
+          | df_proc_call ";"
+          | df_func_call ";"
+          | code_block_def ";"
+          | select_stmt_sub ";"
+          | select_stmt ";"
+          | var_with_type
+
+?event_def: "event" NAME suite
+?func_def: "function" NAME "(" namelist ")" suite
+//?func_def: "function" NAME "(" ")" suite
+proc_def: "process" NAME suite
+code_block_def: "codeblock" nbt_dict "(" exprlist ")" (dict_val)?
+
+scoped_def: "scoped" hidden_def
+          | "scoped" ( func_def | proc_def)
+
+hidden_def: "hidden" ( func_def | proc_def )
+
+select_stmt: "select" NAME ( "(" exprlist ")" )?
+select_stmt_sub: "select" NAME NAME ( "(" exprlist ")" )?
+
+!var_with_type: ("game"|"global") variables 
+              | "local" variables
+              | ("save"|"saved") variables
+              | "scoped" variables
+              | variables
+
+?variables: ( NAME | NAMESTRING ) "=" NAME "(" exprlist ")" ";"  -> func_call_assign
+          | ( NAME | NAMESTRING ) "=" NAME "[" atom "]" ";" -> index_var
+          | "const" ( NAME | NAMESTRING ) "=" atom ";" -> setconst
+          | ( NAME | NAMESTRING ) "=" atom ";" -> setvar
+          | ( NAME | NAMESTRING ) "=" "[" exprlist "]" ";"  -> setlist
+          | math ";"
+
+?if_statement: "if" negated_if
+?negated_if: "not" (if_var | if_player | if_game) -> negateif
+           | if_var | if_player | if_game
+
+if_var: "var" "(" ifvarexpr ")" (dict_val)? suite
+if_player: "player" NAME "(" exprlist ")" (dict_val)? suite
+if_game: "game" NAME "(" exprlist ")" (dict_val)? suite
+else_stmt: "else" suite
+
+forever_loop: "forever" suite
+?while_statement: "while" negated_while
+?negated_while: "not" (if_var | while_cond) -> negatewhile
+              | if_var  -> while_if_var
+              | while_cond
+
+while_cond: NAME "(" exprlist ")" (dict_val)? suite
+
+!ifvarexpr: atom "==" atom
+          | atom "!=" atom
+          | atom ">" atom
+          | atom "<" atom
+          | atom ">=" atom
+          | atom "<=" atom
+          | atom "in" atom ("," atom)? -> ifinrange
+          | "vtype" atom -> iftype
+          | atom -> ifvarexist
+
+suite: "{" statements "}"
+
+?math:
+     | ( NAME | NAMESTRING ) "=" atom "+" atom   -> add
+     | ( NAME | NAMESTRING ) "=" atom "-" atom   -> sub
+     | ( NAME | NAMESTRING ) "=" atom "*" atom   -> mul
+     | ( NAME | NAMESTRING ) "=" atom "/" atom   -> div
+     | ( NAME | NAMESTRING ) "+=" atom           -> inc
+     | ( NAME | NAMESTRING ) "++"                -> inc
+     | ( NAME | NAMESTRING ) "-=" atom           -> dec
+     | ( NAME | NAMESTRING ) "--"                -> dec
+        
+?atom: SIGNED_NUMBER    -> number
+     | TRUE             -> truev
+     | FALSE            -> falsev
+     | expr_var_type
+     | STRING           -> string
+     | loc_val
+     | item_val
+     | game_val
+     //| parserfunc
+     //| NAMESTRING       -> var
+
+!expr_var_type: ("(game)"|"(global)") var
+         | "(local)" var
+         | ("(save)"|"(saved)") var
+         | "(scoped)" var
+         | var
+
+var: (NAME | NAMESTRING)
+
+?satom: atom "(" NUMBER ")" -> atom_slot
+      | atom
+
+
+func_call: NAME [ SELECTOR ] "(" exprlist ")" (dict_val)?
+df_func_call: "call" ( NAME | NAMESTRING ) "(" exprlist ")"
+df_proc_call: "start" ( NAME | NAMESTRING ) (dict_val)?
+//parserfunc: NAME "(" exprlist ")"
+
+exprlist: ( satom ("," satom)* )?
+namelist: ( NAME ("," NAME)* )?
+loc_val: "{" SIGNED_NUMBER "," SIGNED_NUMBER "," SIGNED_NUMBER ["," SIGNED_NUMBER ["," SIGNED_NUMBER]] "}"
+item_val: "item" nbt_data
+game_val: "g" NAMESTRING [BRACESTRING]
+dict_val: "{" kv_list "}"
+kv_list: ( kv_pair ("," kv_pair)* )?
+
+nbt_data: nbt_dict
+nbt_dict: "{" nbt_kv_list "}"
+nbt_list: "[" nbt_val_list "]"
+nbt_kv_list: ( nbt_kv ("," nbt_kv)* )?
+nbt_val_list: ( nbt_value ("," nbt_value)* )?
+nbt_kv: NAME ":" nbt_value
+nbt_value: STRING | nbt_byte_num | SIGNED_NUMBER | nbt_dict | nbt_list
+nbt_byte_num: SIGNED_NUMBER "b"
+
+kv_pair: STRING ":" STRING
+
+SELECTOR: "ALL_PLAYERS" | "ALL" | "DAMAGER" | "VICTIM" | "SHOOTER" | "KILLER" | "ENTITY" | "DEFAULT" | "SELECTION"
+
+COMMENT: /\/\/[^\n]*/
+TRUE: "true"
+FALSE: "false"
+HIDDEN: "hidden"
+STRING : /[ubf]?r?("(?!"").*?(?<!\\)(\\\\)*?"|'(?!'').*?(?<!\\)(\\\\)*?')/i
+NAMESTRING : /[ubf]?r?(\<(?!\<\>).*?(?<!\\)(\\\\)*?\>)/i
+BRACKETSTRING : /[ubf]?r?({(?!{})[\s\S]*?(?<!\\)(\\\\)*?})/i
+BRACESTRING : /[ubf]?r?(\((?!\(\)).*?(?<!\\)(\\\\)*?\))/i
+NAME: ("!"|"%"|"$"|"_"|LETTER|DIGIT) ("!"|"%"|"$"|"_"|LETTER|DIGIT)*
+
+//%import common.CNAME -> NAME
+%import common.LETTER
+%import common.DIGIT
+%import common.NUMBER
+%import common.SIGNED_NUMBER
+%ignore /[\t \f\n]+/
+%ignore COMMENT

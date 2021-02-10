@@ -1,0 +1,68 @@
+#include tags.process
+#include tags.setpvp
+#include gui_items
+#include kit_items
+
+#define GTAG §cPVP §8»§f
+#define SPAWN_LOCS {39.21, 50, 27.47, -1.83, -219.96}, {19.24, 50, 29.11, 1.76, -130.50}
+
+
+event Join 
+{
+    Send ALL ("GTAG §e%default §fjoined.");
+    SetPVP () {PVP_DISABLE};
+    start Loop {CURRENT_TARGETS};
+}
+
+event Quit
+{
+    Send ALL ("GTAG §e%default §fleft.");
+}
+
+event RightClick
+{
+    if player IsLookingAt({29.5, 52.5, 5.5})
+    {
+        GUI.Show (pvp_kit(3), archer_kit(5));
+        GUI.RemoveRow (2);
+    }
+}
+
+event ClickItem
+{
+    if game EventItemEquals(pvp_kit)
+    {
+        Give (PVP_KIT_ITEMS);
+        SetArmor (PVP_KIT_ARMOR);
+        RandomTeleport (SPAWN_LOCS);
+        SetPVP () {PVP_ENABLE};
+    }
+
+    if game EventItemEquals(archer_kit)
+    {
+        Give (ARCHER_KIT_ITEMS);
+        SetArmor (ARCHER_KIT_ARMOR);
+        RandomTeleport (SPAWN_LOCS);
+        SetPVP () {PVP_ENABLE};
+    }
+}
+
+event KillPlayer
+{
+    save <%killer kills>++;
+    Send ALL ("GTAG §e%victim §fwas killed by §c%killer");
+}
+
+event Respawn
+{
+    SetPVP () {PVP_DISABLE};
+}
+
+process Loop
+{
+    forever
+    {
+        ActionBar ("§cKills §8» §e%var(%default kills)");
+        Wait (1);
+    }
+}

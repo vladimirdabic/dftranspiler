@@ -1,0 +1,8 @@
+#define CURRENT_TARGETS "Target Mode": "With current targets"
+#define CURRENT_SELECTION "Target Mode": "With current selection"
+#define NO_TARGETS "Target Mode": "With no targets"
+#define FOR_EACH "Target Mode": "For each in selection"
+
+#define NEW_STORAGE "Local Variables": "Create new storage"
+#define COPY_STORAGE "Local Variables": "Copy current storage"
+#define SHARE_STORAGE "Local Variables": "Share current storage"
